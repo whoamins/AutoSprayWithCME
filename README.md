@@ -2,6 +2,9 @@
 
 This script automates and performs a secure password spraying using [CrackMapExec](https://github.com/Porchetta-Industries/CrackMapExec) on all domain users who have attempts to enter the password incorrectly
 
+**WARNING:** **The script may contain a bug that will ban accounts. The script hasn't yet passed the full debugging cycle.**
+
+
 ## Get users for password spraying
 Is user available for password spraying?
 
