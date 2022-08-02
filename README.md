@@ -1,6 +1,6 @@
 # AutoSprayWithCME
 
-This script automates and performs a secure password spraying using crackmapexec on all domain users who have attempts to enter the password incorrectly
+This script automates and performs a secure password spraying using [CrackMapExec](https://github.com/Porchetta-Industries/CrackMapExec) on all domain users who have attempts to enter the password incorrectly
 
 ## Get users for password spraying
 Is user available for password spraying?
@@ -10,6 +10,12 @@ if user_badpwdtime < (Account Lockout Threshold * 0.4) -> True
 ```
 
 ## Using
+To use it, you need to install [CrackMapExec](https://github.com/Porchetta-Industries/CrackMapExec)
+
+```
+sudo apt-get install crackmapexec
+```
+
 ```
 ./spray.sh 10.10.10.10 John.Doe P@ssw0rd
 ```
