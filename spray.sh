@@ -1,5 +1,13 @@
 #!/bin/bash
-
+#title           :spray.sh
+#description     :This script will automate safe password spraying through all domain users that have badpwdtime < (account_lockout_threshold * 0.4) 
+#author		 :whoamins
+#date            :02.08.2022
+#version         :0.1
+#usage		 :./script.sh ip username password
+#notes           :Install crackmapexec to use this script.
+#bash_version    :5.1.16(1)-release
+#==============================================================================
 
 ip=""
 username=""
@@ -39,9 +47,6 @@ get_domain_password_policy() {
 }
 
 get_args() {
-	# if (($# != 3)); then
- #    	echo "./spray.sh 10.11.1.195 ilsaf.nabiullin P@ssw0rd"
-	# fi
     ip=${commandline_args[0]};
     username=${commandline_args[1]}
     password=${commandline_args[2]}
