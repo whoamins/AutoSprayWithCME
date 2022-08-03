@@ -28,3 +28,4 @@ Some notes on what I want to add in the future
 
 - Determine what is using on password policy, minutes or hours.
 - Less verbose output
+- Spray without domain account using username wordlist
